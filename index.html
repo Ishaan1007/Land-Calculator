@@ -4,147 +4,319 @@
   <meta charset="UTF-8">
   <title>Land Cost Calculator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Arial', sans-serif;
     }
     body {
-      background: #0c1c48;
-      color: #333;
+      background: #f0f4f8;
       margin: 0;
       padding: 20px;
+      color: #222;
     }
-    .wrapper {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 30px;
-      max-width: 1200px;
+    .container {
+      max-width: 900px;
       margin: auto;
     }
     .card {
-      background: white;
-      border-radius: 12px;
-      padding: 25px;
-      flex: 1;
-      min-width: 350px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    .card h2 {
-      margin-top: 0;
-      font-size: 22px;
-      color: #1e40af;
+    h2 {
+      color: #1e3a8a;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .half {
+      flex: 1 1 48%;
     }
     label {
-      font-weight: 600;
-      margin-top: 15px;
       display: block;
+      margin-top: 10px;
+      font-weight: 600;
     }
     input, select {
       width: 100%;
       padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
       margin-top: 5px;
-    }
-    .note {
-      font-size: 13px;
-      color: #888;
-      margin-top: 4px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
     .result {
-      font-size: 20px;
-      font-weight: bold;
-      margin-top: 15px;
-    }
-    .highlight {
-      font-size: 26px;
-      color: #4f46e5;
-    }
-    .section {
-      margin-bottom: 20px;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background-color: #1e40af;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    .color-box {
       padding: 10px;
+      background: #eef2ff;
       border-radius: 8px;
       margin-top: 10px;
     }
-    .blue { background-color: #e0f2fe; }
-    .green { background-color: #dcfce7; }
-    .orange { background-color: #fef3c7; }
-    .purple { background-color: #ede9fe; }
+    button {
+      margin-top: 15px;
+      padding: 12px;
+      width: 100%;
+      background: #1e3a8a;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e40af;
+    }
+    button:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .optional {
+      color: #888;
+    }
   </style>
 </head>
 <body>
-  <div class="wrapper">
+  <div class="container">
     <div class="card">
-      <h2>📍 Property Details</h2>
+      <h2>🏡 Land Cost Calculator</h2>
+      <p>Professional real estate investment calculator</p>
+      
+      <h3>📄 Property Details</h3>
+      <div class="row">
+        <div class="half">
+          <label for="breadth">Breadth (sq. ft.) *</label>
+          <input type="number" id="breadth" placeholder="e.g. 30" required>
+        </div>
+        <div class="half">
+          <label for="length">Length (sq. ft.) *</label>
+          <input type="number" id="length" placeholder="e.g. 75" required>
+        </div>
+      </div>
 
-      <label for="breadth">Plot Breadth (sq. ft.)</label>
-      <input type="number" id="breadth" placeholder="e.g. 30">
+      <label for="cost">Cost per Sq. Yard (₹) *</label>
+      <input type="number" id="cost" placeholder="e.g. 25000" required>
 
-      <label for="length">Plot Length (sq. ft.)</label>
-      <input type="number" id="length" placeholder="e.g. 75">
+      <div class="row">
+        <div class="half">
+          <label for="state">State *</label>
+          <select id="state" required>
+            <option value="">Select State</option>
+            <option value="punjab">Punjab</option>
+            <option value="delhi">Delhi</option>
+            <option value="maharashtra">Maharashtra</option>
+            <option value="uttar_pradesh">Uttar Pradesh</option>
+            <option value="rajasthan">Rajasthan</option>
+            <option value="haryana">Haryana</option>
+          </select>
+        </div>
+        <div class="half">
+          <label for="applicant">Applicant Category *</label>
+          <select id="applicant" required>
+            <option value="">Select Category</option>
+            <option value="M">Male</option>
+            <option value="W">Female</option>
+          </select>
+        </div>
+      </div>
 
-      <label for="cost">Cost per Gaj (₹)</label>
-      <input type="number" id="cost" placeholder="e.g. 25000">
+      <label for="wm">Registered Sale Value (₹) *</label>
+      <input type="number" id="wm" placeholder="e.g. 2500000" required>
 
-      <label for="gender">Gender</label>
-      <select id="gender">
-        <option value="M">Male</option>
-        <option value="W">Female</option>
-      </select>
+      <label for="collectorRate">Custom Collector Rate (₹) <span class="optional">(Optional)</span></label>
+      <input type="number" id="collectorRate" placeholder="Leave empty for auto calculation">
+      <div class="note">💡 If left empty, collector charges will be calculated automatically based on property area (₹14k-25k).</div>
 
-      <label for="wm">W.M. Value (₹) <span title="Used for calculating other expenses">&#9432;</span></label>
-      <input type="number" id="wm" placeholder="e.g. 2500000">
-      <div class="note">Other expenses calculated as W.M. value × 9% or 7%</div>
+      <div class="note">ℹ️ Stamp duty + Registration varies by state & applicant category.</div>
 
-      <button onclick="calculate()">Calculate</button>
+      <button onclick="calculate()">Calculate Investment</button>
+      <button id="exportBtn" onclick="exportPDF()" disabled>📄 Export as PDF</button>
     </div>
 
-    <div class="card">
-      <h2>💰 Live Calculations</h2>
-      <div class="section blue color-box" id="area"></div>
-      <div class="section green color-box" id="landCost"></div>
-      <div class="section orange color-box" id="otherExpenses"></div>
-      <div class="section purple color-box" id="total"></div>
+    <div class="card" id="resultsCard" style="display: none;">
+      <h2>📊 Calculation Results</h2>
+      <div class="result" id="area"></div>
+      <div class="result" id="landCost"></div>
+      <div class="result" id="stampDuty"></div>
+      <div class="result" id="collectorCharges"></div>
+      <div class="result" id="total" style="background: #d1fae5; font-weight: bold; font-size: 18px;"></div>
+      
+      <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+        <h4 style="margin-top: 0;">💡 Calculation Breakdown</h4>
+        <ul style="font-size: 14px; color: #666; margin: 0;">
+          <li>Area conversion: Length × Breadth ÷ 9 (sq. ft. to sq. yards)</li>
+          <li>Land cost: Area × Cost per sq. yard</li>
+          <li>Stamp duty: Based on state and applicant category</li>
+          <li id="collectorInfo">Collector charges: Area-based government fees (₹14k-25k)</li>
+        </ul>
+      </div>
     </div>
   </div>
 
   <script>
-    function calculate() {
-      const l = parseFloat(document.getElementById("length").value);
-      const b = parseFloat(document.getElementById("breadth").value);
-      const c = parseFloat(document.getElementById("cost").value);
-      const wm = parseFloat(document.getElementById("wm").value);
-      const g = document.getElementById("gender").value;
+    // Updated duty rates with correct Punjab rates
+    const dutyRates = {
+      punjab: { M: 0.08, W: 0.06 },  // Updated: Male 8%, Female 6%
+      delhi: { M: 0.07, W: 0.05 },
+      maharashtra: { M: 0.06, W: 0.06 },
+      uttar_pradesh: { M: 0.07, W: 0.06 },
+      rajasthan: { M: 0.06, W: 0.05 },
+      haryana: { M: 0.08, W: 0.06 }
+    };
 
-      if (isNaN(l) || isNaN(b) || isNaN(c) || isNaN(wm)) {
-        alert("Please fill all fields correctly.");
+    function getCollectorRate(area) {
+      if (area <= 100) return 14000;
+      if (area <= 200) return 16000;
+      if (area <= 300) return 18000;
+      if (area <= 500) return 20000;
+      return 25000;
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    let calculationData = null;
+
+    function calculate() {
+      const breadth = parseFloat(document.getElementById("breadth").value);
+      const length = parseFloat(document.getElementById("length").value);
+      const cost = parseFloat(document.getElementById("cost").value);
+      const state = document.getElementById("state").value;
+      const category = document.getElementById("applicant").value;
+      const wm = parseFloat(document.getElementById("wm").value);
+      const customCollectorRate = parseFloat(document.getElementById("collectorRate").value);
+
+      // Validation
+      if (isNaN(breadth) || isNaN(length) || isNaN(cost) || isNaN(wm) || !state || !category) {
+        alert("Please fill all required fields correctly.");
         return;
       }
 
-      const area = (l * b) / 9;
-      const landCost = area * c;
-      const other = g === 'M' ? wm * 0.09 : wm * 0.07;
-      const total = landCost + other;
+      // Calculations
+      const area = (breadth * length) / 9;
+      const landCost = area * cost;
+      const rate = dutyRates[state][category];
+      const stampDuty = wm * rate;
+      
+      // Use custom collector rate if provided, otherwise calculate automatically
+      const collectorCharges = !isNaN(customCollectorRate) && customCollectorRate > 0 
+        ? customCollectorRate 
+        : getCollectorRate(area);
+      
+      const total = landCost + stampDuty + collectorCharges;
 
-      document.getElementById("area").innerHTML = `<strong>Plot Area</strong><br>${b} × ${l} sq. ft. ÷ 9 = <span class='highlight'>${area.toFixed(0)} gaj</span>`;
-      document.getElementById("landCost").innerHTML = `<strong>Land Cost</strong><br>${area.toFixed(0)} gaj × ₹${c.toLocaleString()} = <span class='highlight'>₹${landCost.toLocaleString()}</span>`;
-      document.getElementById("otherExpenses").innerHTML = `<strong>Other Expenses</strong><br>₹${wm.toLocaleString()} × ${g === 'M' ? '9%' : '7%'} = <span class='highlight'>₹${other.toLocaleString()}</span>`;
-      document.getElementById("total").innerHTML = `<strong>Total Investment</strong><br><span class='highlight'>₹${total.toLocaleString()}</span>`;
+      // Store calculation data for PDF export
+      calculationData = {
+        breadth, length, cost, state, category, wm, 
+        customCollectorRate: !isNaN(customCollectorRate) && customCollectorRate > 0 ? customCollectorRate : null,
+        area, landCost, stampDuty, collectorCharges, total
+      };
+
+      // Display results
+      document.getElementById("area").innerHTML = `<strong>Property Area:</strong> ${area.toFixed(2)} sq. yards`;
+      document.getElementById("landCost").innerHTML = `<strong>Land Cost:</strong> ${formatCurrency(landCost)}`;
+      document.getElementById("stampDuty").innerHTML = `<strong>Stamp Duty + Registration:</strong> ${formatCurrency(stampDuty)}`;
+      document.getElementById("collectorCharges").innerHTML = `<strong>Collector Charges:</strong> ${formatCurrency(collectorCharges)}`;
+      document.getElementById("total").innerHTML = `<strong>Total Investment Required:</strong> ${formatCurrency(total)}`;
+
+      // Update collector info text
+      const collectorInfoText = calculationData.customCollectorRate 
+        ? "Collector charges: Custom rate used"
+        : "Collector charges: Area-based government fees (₹14k-25k)";
+      document.getElementById("collectorInfo").textContent = collectorInfoText;
+
+      // Show results and enable export
+      document.getElementById("resultsCard").style.display = "block";
+      document.getElementById("exportBtn").disabled = false;
+
+      // Scroll to results
+      document.getElementById("resultsCard").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function exportPDF() {
+      if (!calculationData) {
+        alert("Please calculate the results first before exporting.");
+        return;
+      }
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Header
+        doc.setFontSize(20);
+        doc.setTextColor(30, 64, 175);
+        doc.text("Land Cost Calculator", 20, 25);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        doc.text("Professional Real Estate Investment Report", 20, 35);
+        
+        // Property Details
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text("Property Details:", 20, 55);
+        
+        doc.setFontSize(11);
+        const stateLabels = {
+          punjab: "Punjab", delhi: "Delhi", maharashtra: "Maharashtra",
+          uttar_pradesh: "Uttar Pradesh", rajasthan: "Rajasthan", haryana: "Haryana"
+        };
+        const categoryLabels = { M: "Male", W: "Female" };
+        
+        let yPos = 68;
+        doc.text(`Dimensions: ${calculationData.breadth} ft × ${calculationData.length} ft`, 20, yPos);
+        doc.text(`Cost per sq. yard: ₹${calculationData.cost.toLocaleString()}`, 20, yPos += 10);
+        doc.text(`State: ${stateLabels[calculationData.state]}`, 20, yPos += 10);
+        doc.text(`Applicant: ${categoryLabels[calculationData.category]}`, 20, yPos += 10);
+        doc.text(`Registered Sale Value: ₹${calculationData.wm.toLocaleString()}`, 20, yPos += 10);
+        
+        if (calculationData.customCollectorRate) {
+          doc.text(`Custom Collector Rate: ₹${calculationData.customCollectorRate.toLocaleString()}`, 20, yPos += 10);
+        }
+        
+        // Calculation Results
+        doc.setFontSize(14);
+        doc.text("Calculation Results:", 20, yPos += 20);
+        
+        doc.setFontSize(11);
+        doc.text(`Property Area: ${calculationData.area.toFixed(2)} sq. yards`, 20, yPos += 13);
+        doc.text(`Land Cost: ${formatCurrency(calculationData.landCost)}`, 20, yPos += 10);
+        doc.text(`Stamp Duty + Registration: ${formatCurrency(calculationData.stampDuty)}`, 20, yPos += 10);
+        doc.text(`Collector Charges: ${formatCurrency(calculationData.collectorCharges)}`, 20, yPos += 10);
+        
+        // Total with emphasis
+        doc.setFontSize(12);
+        doc.setTextColor(16, 185, 129);
+        doc.text(`Total Investment Required: ${formatCurrency(calculationData.total)}`, 20, yPos += 17);
+        
+        // Footer
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 270);
+        
+        // Save the PDF
+        doc.save("Land_Cost_Calculation_Report.pdf");
+        
+        alert("PDF report has been downloaded successfully!");
+      } catch (error) {
+        alert("Failed to generate PDF. Please try again.");
+        console.error("PDF Export Error:", error);
+      }
     }
   </script>
 </body>
