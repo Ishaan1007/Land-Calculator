@@ -247,27 +247,86 @@
     document.getElementById("resultsCard").style.display = "block";
     document.getElementById("exportBtn").disabled = false;
   }
-
-  function exportPDF() {
+    
+function exportPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  const imgData = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...'; // (truncated for space — full base64 will be provided separately)
+  // ✅ Your base64 logo
+  const logoBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK8AAABGCAMAAABXZMaBAAAAAXNSR0IB2cksfwAAAGBQTFRF////QEBARERE2traAADzAAD////u7u7MzMyenp7Ly8vn5+eOjo5oaGhJSUmu7u7dXV1UVFRYWFhQUFBSUlJbW1udnZ2T09PV1dXc3NyFhYWZmZmbm5u9vb29fX1h4eHyMjIv7vPswAAABZ0Uk5T/////////////////////////wDq4y3DAAAAqUlEQVR42u3bMQrCMAxE0WfQkwLCqvP+9zAkYa1Elnk+cN34lsVDMECBAgQIECAAAECBAgQ2EJYOyKT5ntx1nKa7c+ZtVmvv9UJg4u2vm3Wi+yNPoglfhVaS4ViPFZheSWW4ViPFZheSWW4ViPFZheSWW4ViPFZheSWXyqUzWxzm7EKzJrE7rmV9SYIECBAgAABAgQIECBAgkHuBXQ/kpboRkxIAAAAASUVORK5CYII=";
 
-  // Logo at top
-  doc.addImage(imgData, 'JPEG', 70, 10, 70, 30); // x, y, width, height
+  // ✅ Add Logo
+  doc.addImage(logoBase64, 'PNG', 65, 10, 80, 20); // x, y, width, height
 
-  let y = 45;
-  doc.setFontSize(18);
+  // ✅ Add Title & Date
+  let y = 35;
+  doc.setFontSize(16);
   doc.text("Land Cost Calculator Report", 20, y);
+  y += 8;
+  doc.setFontSize(11);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
+  y += 10;
+
+  // ✅ Gather inputs from form
+  const mode = document.getElementById("areaMode").value;
+  const state = document.getElementById("state").value;
+  const applicant = document.getElementById("applicant").value;
+  const rate = parseFloat(document.getElementById("cost").value);
+  const wm = parseFloat(document.getElementById("wm").value);
+  const customOther = parseFloat(document.getElementById("otherCharges").value);
+
+  let area = 0;
+  if (mode === "dimensions") {
+    const b = parseFloat(document.getElementById("breadth").value);
+    const l = parseFloat(document.getElementById("length").value);
+    area = (b * l) / 9;
+  } else {
+    area = parseFloat(document.getElementById("area").value);
+  }
+
+  const landCost = area * rate;
+  const dutyPercent = getDutyRate(state, applicant, wm);
+  const stampDuty = wm * (dutyPercent / 100);
+  const otherCharges = !isNaN(customOther) && customOther > 0 ? customOther : getOtherCharges(area, state);
+  const total = landCost + stampDuty + otherCharges;
+
+  // ✅ Input Details
+  y += 10;
+  doc.setFontSize(13);
+  doc.text("Property & Transaction Details:", 20, y);
+  y += 8;
+  doc.setFontSize(11);
+  doc.text(`State: ${state.replace(/_/g, " ")}`, 20, y);
+  doc.text(`Applicant: ${applicant === 'M' ? 'Male' : 'Female'}`, 100, y);
+  y += 8;
+  doc.text(`Area: ${area.toFixed(2)} sq. yards`, 20, y);
+  doc.text(`Rate per Sq. Yard: ₹${rate.toLocaleString()}`, 100, y);
+  y += 8;
+  doc.text(`Registered Sale Value: ₹${wm.toLocaleString()}`, 20, y);
+
+  // ✅ Result Summary
+  y += 12;
+  doc.setFontSize(13);
+  doc.text("Calculation Summary:", 20, y);
+  y += 8;
+  doc.setFontSize(11);
+  doc.text(`Land Cost: ₹${landCost.toLocaleString()}`, 20, y);
+  y += 8;
+  doc.text(`Stamp Duty + Registration: ₹${stampDuty.toLocaleString()}`, 20, y);
+  y += 8;
+  doc.text(`Other Charges: ₹${otherCharges.toLocaleString()}`, 20, y);
   y += 10;
   doc.setFontSize(12);
-  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
+  doc.setTextColor(0, 128, 0);
+  doc.text(`Total Investment Required: ₹${total.toLocaleString()}`, 20, y);
+
+  // ✅ Footer note
   y += 15;
+  doc.setFontSize(9);
+  doc.setTextColor(100);
+  doc.text("Note: Stamp Duty and Registration are auto-calculated. Other Charges are user-defined estimates.", 20, y);
 
-  // Now your standard input/output logic goes here (same as current exportPDF)
-  // ... I’ll include the full version with values if needed
-
+  // ✅ Save the PDF
   doc.save("Land_Cost_Report.pdf");
 }
 </script>
