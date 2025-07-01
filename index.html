@@ -1,142 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Land Cost Calculator</title>
-
-  <!-- ✅ jsPDF -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    window.jsPDF = window.jspdf.jsPDF;
-  </script>
-
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background: #f0f4f8; padding: 20px; color: #222; }
+    * { box-sizing: border-box; font-family: 'Arial', sans-serif; }
+    body { background: #f0f4f8; margin: 0; padding: 20px; color: #222; }
     .container { max-width: 900px; margin: auto; }
-    .card {
-      background: #fff; padding: 20px; border-radius: 10px;
-      margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h2 { color: #1e3a8a; margin-bottom: 5px; }
+    .card { background: #fff; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: #1e3a8a; }
     .row { display: flex; gap: 10px; flex-wrap: wrap; }
     .half { flex: 1 1 48%; }
     label { display: block; margin-top: 10px; font-weight: 600; }
-    input, select {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border-radius: 5px; border: 1px solid #ccc;
-    }
-    .result {
-      padding: 10px; background: #eef2ff;
-      border-radius: 8px; margin-top: 10px;
-    }
-    button {
-      margin-top: 15px; padding: 12px; width: 100%;
-      background: #1e3a8a; color: #fff; border: none;
-      border-radius: 6px; font-size: 16px; cursor: pointer;
-    }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+    .result { padding: 10px; background: #eef2ff; border-radius: 8px; margin-top: 10px; }
+    button { margin-top: 15px; padding: 12px; width: 100%; background: #1e3a8a; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
     button:hover { background: #1e40af; }
     button:disabled { background: #94a3b8; cursor: not-allowed; }
     .note { font-size: 12px; color: #666; margin-top: 4px; }
+    .optional { color: #888; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  window.jsPDF = window.jspdf.jsPDF; // enables jsPDF to work globally
+</script>
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h2>🏡 Land Cost Calculator</h2>
-      <p>Professional real estate investment calculator</p>
+  <div class="card">
+    <h2>🏡 Land Cost Calculator</h2>
+    <p>Professional real estate investment calculator</p>
 
-      <!-- Area Input Toggle -->
-      <label for="areaMode">📐 How do you want to enter area?</label>
-      <select id="areaMode" onchange="toggleAreaMode()">
-        <option value="dimensions">Length × Breadth (sq. ft.)</option>
-        <option value="direct">Direct Area (sq. yards)</option>
-      </select>
+    <!-- Area Mode Selector -->
+    <label for="areaMode">📐 How do you want to enter area?</label>
+    <select id="areaMode" onchange="toggleAreaMode()">
+      <option value="dimensions">Length × Breadth (sq. ft.)</option>
+      <option value="direct">Direct Area (sq. yards)</option>
+    </select>
 
-      <!-- Dimensions -->
-      <div class="row" id="dimensionInputs">
-        <div class="half">
-          <label for="breadth">Breadth (sq. ft.) *</label>
-          <input type="number" id="breadth" />
-        </div>
-        <div class="half">
-          <label for="length">Length (sq. ft.) *</label>
-          <input type="number" id="length" />
-        </div>
+    <!-- Length × Breadth Inputs -->
+    <div class="row" id="dimensionInputs">
+      <div class="half">
+        <label for="breadth">Breadth (sq. ft.) *</label>
+        <input type="number" id="breadth">
       </div>
-
-      <!-- Direct Area -->
-      <div id="areaInput" style="display: none;">
-        <label for="area">Area (sq. yards) *</label>
-        <input type="number" id="area" />
+      <div class="half">
+        <label for="length">Length (sq. ft.) *</label>
+        <input type="number" id="length">
       </div>
-
-      <label for="cost">Cost per Sq. Yard (₹) *</label>
-      <input type="number" id="cost" />
-
-      <div class="row">
-        <div class="half">
-          <label for="state">State *</label>
-          <select id="state">
-            <option value="">Select State</option>
-            <option value="punjab">Punjab</option>
-            <option value="uttar_pradesh">Uttar Pradesh</option>
-            <option value="himachal_pradesh">Himachal Pradesh</option>
-            <!-- Add other states here -->
-          </select>
-        </div>
-        <div class="half">
-          <label for="applicant">Applicant Category *</label>
-          <select id="applicant">
-            <option value="">Select</option>
-            <option value="M">Male</option>
-            <option value="W">Female</option>
-          </select>
-        </div>
-      </div>
-
-      <label for="wm">Registered Sale Value (₹) *</label>
-      <input type="number" id="wm" />
-
-      <label for="otherCharges">Other Charges (Writer + Mutation + Court, etc.)</label>
-      <input type="number" id="otherCharges" placeholder="Leave empty for auto estimate" />
-      <div class="note">ℹ️ Stamp duty & registration are auto-calculated based on state and gender. Do not include them here.</div>
-
-      <button onclick="calculate()">Calculate Investment</button>
-      <button id="exportBtn" onclick="exportPDF()" disabled>📄 Export as PDF</button>
     </div>
 
-    <div class="card" id="resultsCard" style="display: none;">
-      <h2>📊 Calculation Results</h2>
-      <div class="result" id="areaResult"></div>
-      <div class="result" id="landCost"></div>
-      <div class="result" id="stampDuty"></div>
-      <div class="result" id="otherChargesResult"></div>
-      <div class="result" id="total" style="background: #d1fae5; font-weight: bold;"></div>
+    <!-- Direct Area Input (hidden by default) -->
+    <div id="areaInput" style="display: none;">
+      <label for="area">Area (sq. yards) *</label>
+      <input type="number" id="area">
     </div>
+
+    <label for="cost">Cost per Sq. Yard (₹) *</label>
+    <input type="number" id="cost">
+
+    <div class="row">
+      <div class="half">
+        <label for="state">State *</label>
+        <select id="state">
+          <option value="">Select State</option>
+          <option value="andhra_pradesh">Andhra Pradesh</option>
+          <option value="arunachal_pradesh">Arunachal Pradesh</option>
+          <option value="assam">Assam</option>
+          <option value="bihar">Bihar</option>
+          <option value="chhattisgarh">Chhattisgarh</option>
+          <option value="goa">Goa</option>
+          <option value="gujarat">Gujarat</option>
+          <option value="haryana">Haryana</option>
+          <option value="himachal_pradesh">Himachal Pradesh</option>
+          <option value="jammu_kashmir">Jammu & Kashmir</option>
+          <option value="jharkhand">Jharkhand</option>
+          <option value="karnataka">Karnataka</option>
+          <option value="kerala">Kerala</option>
+          <option value="madhya_pradesh">Madhya Pradesh</option>
+          <option value="maharashtra">Maharashtra</option>
+          <option value="manipur">Manipur</option>
+          <option value="meghalaya">Meghalaya</option>
+          <option value="mizoram">Mizoram</option>
+          <option value="nagaland">Nagaland</option>
+          <option value="odisha">Odisha</option>
+          <option value="punjab">Punjab</option>
+          <option value="rajasthan">Rajasthan</option>
+          <option value="sikkim">Sikkim</option>
+          <option value="tamil_nadu">Tamil Nadu</option>
+          <option value="telangana">Telangana</option>
+          <option value="tripura">Tripura</option>
+          <option value="uttar_pradesh">Uttar Pradesh</option>
+          <option value="uttarakhand">Uttarakhand</option>
+          <option value="west_bengal">West Bengal</option>
+        </select>
+      </div>
+      <div class="half">
+        <label for="applicant">Applicant Category *</label>
+        <select id="applicant">
+          <option value="">Select Category</option>
+          <option value="M">Male</option>
+          <option value="W">Female</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="wm">Registered Sale Value (₹) *</label>
+    <input type="number" id="wm">
+
+    <!-- ✅ Renamed to Other Charges -->
+    <label for="otherCharges">Other Charges (Writer + Mutation + Court, etc.)</label>
+    <input type="number" id="otherCharges" placeholder="Leave empty for auto estimate">
+
+    <!-- ✅ Stamp duty warning -->
+    <div class="note">ℹ️ Stamp duty & registration are auto-calculated based on state and gender. Do not include them here.</div>
+
+    <button onclick="calculate()">Calculate Investment</button>
+    <button id="exportBtn" onclick="exportPDF()" disabled>📄 Export as PDF</button>
   </div>
-<script>
-  // Toggle area input mode
+
+  <div class="card" id="resultsCard" style="display: none;">
+    <h2>📊 Calculation Results</h2>
+    <div class="result" id="areaResult"></div>
+    <div class="result" id="landCost"></div>
+    <div class="result" id="stampDuty"></div>
+    <div class="result" id="otherChargesResult"></div>
+    <div class="result" id="total" style="background: #d1fae5; font-weight: bold;"></div>
+  </div>
+</div>
+  <script>
   function toggleAreaMode() {
     const mode = document.getElementById("areaMode").value;
     document.getElementById("dimensionInputs").style.display = mode === "dimensions" ? "flex" : "none";
     document.getElementById("areaInput").style.display = mode === "direct" ? "block" : "none";
   }
 
-  // Stamp duty logic
   function getDutyRate(state, gender, wm) {
     if (state === "himachal_pradesh") {
-      return gender === "M" ? (wm <= 5000000 ? 6 : 8) : (wm <= 8000000 ? 4 : 8);
+      if (gender === "M") return wm <= 5000000 ? 6 : 8;
+      else return wm <= 8000000 ? 4 : 8;
     }
-    if (state === "uttarakhand") return gender === "M" ? 7 : 5.75;
-    if (state === "karnataka") return wm <= 2000000 ? 2 : wm <= 4500000 ? 3 : 5;
-
-    const rates = {
-      punjab: { M: 8, W: 6 },
-      uttar_pradesh: { M: 8, W: 7 },
+    if (state === "karnataka") {
+      if (wm <= 2000000) return 2;
+      if (wm <= 4500000) return 3;
+      return 5;
+    }
+    if (state === "uttarakhand") {
+      return gender === "M" ? 7 : 5.75;
+    }
+    const dutyRates = {
+      andhra_pradesh:     { M: 5.5,  W: 5.5 },
+      arunachal_pradesh:  { M: 7,    W: 7 },
+      assam:              { M: 8.25, W: 8.25 },
+      bihar:              { M: 7.7,  W: 7.7 },
+      chhattisgarh:       { M: 9,    W: 8 },
+      goa:                { M: 6,    W: 6 },
+      gujarat:            { M: 5.9,  W: 4.9 },
+      haryana:            { M: 8,    W: 6 },
+      jammu_kashmir:      { M: 5,    W: 5 },
+      jharkhand:          { M: 7,    W: 7 },
+      kerala:             { M: 10,   W: 10 },
+      madhya_pradesh:     { M: 10.5, W: 10.5 },
+      maharashtra:        { M: 7,    W: 6 },
+      manipur:            { M: 10,   W: 10 },
+      meghalaya:          { M: 9.9,  W: 9.9 },
+      mizoram:            { M: 9,    W: 9 },
+      nagaland:           { M: 8.25, W: 8.25 },
+      odisha:             { M: 7,    W: 6 },
+      punjab:             { M: 8,    W: 6 },
+      rajasthan:          { M: 6,    W: 5 },
+      sikkim:             { M: 6,    W: 6 },
+      tamil_nadu:         { M: 11,   W: 11 },
+      telangana:          { M: 5.5,  W: 5.5 },
+      tripura:            { M: 5,    W: 5 },
+      uttar_pradesh:      { M: 8,    W: 7 },
+      west_bengal:        { M: 7,    W: 7 }
     };
-    return rates[state]?.[gender] || 7;
+    return dutyRates[state]?.[gender] || 7;
   }
 
   function getOtherCharges(area, state) {
@@ -146,7 +188,11 @@
       if (area <= 100) return 14000;
       return 16000;
     }
-    return area <= 100 ? 14000 : area <= 200 ? 16000 : 20000;
+    if (area <= 100) return 14000;
+    if (area <= 200) return 16000;
+    if (area <= 300) return 18000;
+    if (area <= 500) return 20000;
+    return 25000;
   }
 
   function formatCurrency(amount) {
@@ -159,101 +205,102 @@
 
   function calculate() {
     const mode = document.getElementById("areaMode").value;
-    const b = parseFloat(document.getElementById("breadth").value);
-    const l = parseFloat(document.getElementById("length").value);
-    const areaInput = parseFloat(document.getElementById("area").value);
-    const rate = parseFloat(document.getElementById("cost").value);
-    const wm = parseFloat(document.getElementById("wm").value);
     const state = document.getElementById("state").value;
     const applicant = document.getElementById("applicant").value;
+    const rate = parseFloat(document.getElementById("cost").value);
+    const wm = parseFloat(document.getElementById("wm").value);
     const customOther = parseFloat(document.getElementById("otherCharges").value);
 
     let area = 0;
     if (mode === "dimensions") {
-      if (isNaN(b) || isNaN(l)) return alert("Enter length and breadth");
+      const b = parseFloat(document.getElementById("breadth").value);
+      const l = parseFloat(document.getElementById("length").value);
+      if (isNaN(b) || isNaN(l)) {
+        alert("Please enter both length and breadth.");
+        return;
+      }
       area = (b * l) / 9;
     } else {
-      if (isNaN(areaInput)) return alert("Enter area");
-      area = areaInput;
+      area = parseFloat(document.getElementById("area").value);
+      if (isNaN(area)) {
+        alert("Please enter area in sq. yards.");
+        return;
+      }
     }
 
     if (!state || !applicant || isNaN(rate) || isNaN(wm)) {
-      alert("Please fill all required fields");
+      alert("Please fill all required fields.");
       return;
     }
 
     const landCost = area * rate;
     const duty = getDutyRate(state, applicant, wm);
     const stampDuty = wm * (duty / 100);
-    const otherCharges = !isNaN(customOther) && customOther > 0 ? customOther : getOtherCharges(area, state);
+    const otherCharges = !isNaN(customOther) && customOther > 0
+      ? customOther
+      : getOtherCharges(area, state);
+
     const total = landCost + stampDuty + otherCharges;
 
-    document.getElementById("areaResult").innerHTML = `<strong>Area:</strong> ${area.toFixed(2)} sq. yards`;
+    document.getElementById("areaResult").innerHTML = `<strong>Property Area:</strong> ${area.toFixed(2)} sq. yards`;
     document.getElementById("landCost").innerHTML = `<strong>Land Cost:</strong> ${formatCurrency(landCost)}`;
     document.getElementById("stampDuty").innerHTML = `<strong>Stamp Duty + Registration:</strong> ${formatCurrency(stampDuty)}`;
     document.getElementById("otherChargesResult").innerHTML = `<strong>Other Charges:</strong> ${formatCurrency(otherCharges)}`;
-    document.getElementById("total").innerHTML = `<strong>Total Investment:</strong> ${formatCurrency(total)}`;
+    document.getElementById("total").innerHTML = `<strong>Total Investment Required:</strong> ${formatCurrency(total)}`;
     document.getElementById("resultsCard").style.display = "block";
     document.getElementById("exportBtn").disabled = false;
   }
+    
+function exportPDF() {
+  const doc = new jsPDF();
 
-  function exportPDF() {
-    const doc = new jsPDF();
+  let y = 20;
+  doc.setFontSize(16);
+  doc.text("Land Cost Calculator Report", 20, y);
+  y += 10;
+  doc.setFontSize(11);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
 
-    const logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAAoCAYAAACMs+nrAAABhUlEQVR4nO3XQQrCQBBF0evpP//u7koZkEohA28z0hpt74BS7LwovfsIkqRERERERERERERERERERERER8T9GvCH7kx4TTIXOHNNMhd4c009YcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMdYcEVaYfMfW3YT7ef8Cm0cZ3ltXakMAAAAASUVORK5CYII=";
+  const mode = document.getElementById("areaMode").value;
+  const state = document.getElementById("state").value;
+  const applicant = document.getElementById("applicant").value;
+  const rate = parseFloat(document.getElementById("cost").value);
+  const wm = parseFloat(document.getElementById("wm").value);
+  const customOther = parseFloat(document.getElementById("otherCharges").value);
 
-    doc.addImage(logo, 'PNG', 70, 10, 70, 20);
-
-    let y = 35;
-    doc.setFontSize(16);
-    doc.text("Land Cost Calculator Report", 20, y);
-    y += 10;
-    doc.setFontSize(11);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
-
-    const mode = document.getElementById("areaMode").value;
-    const state = document.getElementById("state").value;
-    const applicant = document.getElementById("applicant").value;
-    const rate = parseFloat(document.getElementById("cost").value);
-    const wm = parseFloat(document.getElementById("wm").value);
-    const customOther = parseFloat(document.getElementById("otherCharges").value);
+  let area = 0;
+  if (mode === "dimensions") {
     const b = parseFloat(document.getElementById("breadth").value);
     const l = parseFloat(document.getElementById("length").value);
-    const areaInput = parseFloat(document.getElementById("area").value);
-
-    let area = mode === "dimensions" ? (b * l) / 9 : areaInput;
-
-    const landCost = area * rate;
-    const duty = getDutyRate(state, applicant, wm);
-    const stampDuty = wm * (duty / 100);
-    const otherCharges = !isNaN(customOther) && customOther > 0 ? customOther : getOtherCharges(area, state);
-    const total = landCost + stampDuty + otherCharges;
-
-    y += 15;
-    doc.setFontSize(13);
-    doc.text("Property Details", 20, y); y += 8;
-    doc.setFontSize(11);
-    doc.text(`State: ${state.replace(/_/g, ' ')}`, 20, y); y += 8;
-    doc.text(`Applicant: ${applicant === 'M' ? 'Male' : 'Female'}`, 20, y); y += 8;
-    doc.text(`Area: ${area.toFixed(2)} sq. yards`, 20, y); y += 8;
-    doc.text(`Rate: ₹${rate.toLocaleString()}/sq. yard`, 20, y); y += 8;
-    doc.text(`Sale Value: ₹${wm.toLocaleString()}`, 20, y);
-
-    y += 12;
-    doc.setFontSize(13);
-    doc.text("Cost Breakdown", 20, y); y += 8;
-    doc.setFontSize(11);
-    doc.text(`Land Cost: ₹${landCost.toLocaleString()}`, 20, y); y += 8;
-    doc.text(`Stamp Duty + Reg.: ₹${stampDuty.toLocaleString()}`, 20, y); y += 8;
-    doc.text(`Other Charges: ₹${otherCharges.toLocaleString()}`, 20, y); y += 10;
-
-    doc.setFontSize(13);
-    doc.setTextColor(0, 128, 0);
-    doc.text(`Total Investment: ₹${total.toLocaleString()}`, 20, y);
-
-    doc.save("Land_Cost_Report.pdf");
+    area = (b * l) / 9;
+  } else {
+    area = parseFloat(document.getElementById("area").value);
   }
+
+  const landCost = area * rate;
+  const duty = getDutyRate(state, applicant, wm);
+  const stampDuty = wm * (duty / 100);
+  const otherCharges = !isNaN(customOther) && customOther > 0 ? customOther : getOtherCharges(area, state);
+  const total = landCost + stampDuty + otherCharges;
+
+  y += 15;
+  doc.setFontSize(12);
+  doc.text(`State: ${state.replace(/_/g, " ")}`, 20, y); y += 8;
+  doc.text(`Applicant: ${applicant === 'M' ? 'Male' : 'Female'}`, 20, y); y += 8;
+  doc.text(`Area: ${area.toFixed(2)} sq. yards`, 20, y); y += 8;
+  doc.text(`Rate per Sq. Yard: ₹${rate.toLocaleString()}`, 20, y); y += 8;
+  doc.text(`Registered Sale Value: ₹${wm.toLocaleString()}`, 20, y); y += 8;
+  doc.text(`Stamp Duty + Registration: ₹${stampDuty.toLocaleString()}`, 20, y); y += 8;
+  doc.text(`Other Charges: ₹${otherCharges.toLocaleString()}`, 20, y); y += 8;
+
+  doc.setFontSize(13);
+  doc.setTextColor(0, 128, 0);
+  doc.text(`Total Investment Required: ₹${total.toLocaleString()}`, 20, y + 10);
+
+  doc.save("Land_Cost_Report.pdf");
+}
 </script>
-</body>
-</html>
+      
+    
+  
 
