@@ -23,6 +23,10 @@
     .note { font-size: 12px; color: #666; margin-top: 4px; }
     .optional { color: #888; }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  window.jsPDF = window.jspdf.jsPDF; // enables jsPDF to work globally
+</script>
 </head>
 <body>
   <div class="container">
@@ -249,7 +253,6 @@
   }
     
 function exportPDF() {
-  const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
   let y = 20;
@@ -258,7 +261,6 @@ function exportPDF() {
   y += 10;
   doc.setFontSize(11);
   doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
-  y += 10;
 
   const mode = document.getElementById("areaMode").value;
   const state = document.getElementById("state").value;
@@ -282,17 +284,19 @@ function exportPDF() {
   const otherCharges = !isNaN(customOther) && customOther > 0 ? customOther : getOtherCharges(area, state);
   const total = landCost + stampDuty + otherCharges;
 
+  y += 15;
   doc.setFontSize(12);
-  doc.text(`State: ${state.replace(/_/g, " ")}`, 20, y += 10);
-  doc.text(`Applicant: ${applicant === 'M' ? 'Male' : 'Female'}`, 20, y += 8);
-  doc.text(`Area: ${area.toFixed(2)} sq. yards`, 20, y += 8);
-  doc.text(`Rate: ₹${rate.toLocaleString()}/sq. yd`, 20, y += 8);
-  doc.text(`Registered Sale Value: ₹${wm.toLocaleString()}`, 20, y += 8);
-  doc.text(`Stamp Duty + Registration: ₹${stampDuty.toLocaleString()}`, 20, y += 8);
-  doc.text(`Other Charges: ₹${otherCharges.toLocaleString()}`, 20, y += 8);
+  doc.text(`State: ${state.replace(/_/g, " ")}`, 20, y); y += 8;
+  doc.text(`Applicant: ${applicant === 'M' ? 'Male' : 'Female'}`, 20, y); y += 8;
+  doc.text(`Area: ${area.toFixed(2)} sq. yards`, 20, y); y += 8;
+  doc.text(`Rate per Sq. Yard: ₹${rate.toLocaleString()}`, 20, y); y += 8;
+  doc.text(`Registered Sale Value: ₹${wm.toLocaleString()}`, 20, y); y += 8;
+  doc.text(`Stamp Duty + Registration: ₹${stampDuty.toLocaleString()}`, 20, y); y += 8;
+  doc.text(`Other Charges: ₹${otherCharges.toLocaleString()}`, 20, y); y += 8;
+
   doc.setFontSize(13);
   doc.setTextColor(0, 128, 0);
-  doc.text(`Total Investment: ₹${total.toLocaleString()}`, 20, y += 12);
+  doc.text(`Total Investment Required: ₹${total.toLocaleString()}`, 20, y + 10);
 
   doc.save("Land_Cost_Report.pdf");
 }
