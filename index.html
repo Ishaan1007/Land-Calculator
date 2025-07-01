@@ -114,37 +114,53 @@
     </div>
   </div>
   <script>
-  const dutyRates = {
-    andhra_pradesh:     { M: 5.5,  W: 5.5 },
-    arunachal_pradesh:  { M: 7,    W: 7 },
-    assam:              { M: 8.25, W: 8.25 },
-    bihar:              { M: 7.7,  W: 7.7 },
-    chhattisgarh:       { M: 9,    W: 8 },
-    goa:                { M: 6,    W: 6 },
-    gujarat:            { M: 5.9,  W: 4.9 },
-    haryana:            { M: 8,    W: 6 },
-    himachal_pradesh:   { M: 8,    W: 6 },
-    jammu_kashmir:      { M: 5,    W: 5 },
-    jharkhand:          { M: 7,    W: 7 },
-    karnataka:          { M: 6,    W: 6 },
-    kerala:             { M: 10,   W: 10 },
-    madhya_pradesh:     { M: 10.5, W: 10.5 },
-    maharashtra:        { M: 7,    W: 6 },
-    manipur:            { M: 10,   W: 10 },
-    meghalaya:          { M: 9.9,  W: 9.9 },
-    mizoram:            { M: 9,    W: 9 },
-    nagaland:           { M: 8.25, W: 8.25 },
-    odisha:             { M: 7,    W: 6 },
-    punjab:             { M: 8,    W: 6 },
-    rajasthan:          { M: 6,    W: 5 },
-    sikkim:             { M: 6,    W: 6 },
-    tamil_nadu:         { M: 11,   W: 11 },
-    telangana:          { M: 5.5,  W: 5.5 },
-    tripura:            { M: 5,    W: 5 },
-    uttar_pradesh:      { M: 8,    W: 7 },
-    uttarakhand:        { M: 7,    W: 5.75 },
-    west_bengal:        { M: 7,    W: 7 }
-  };
+  function getDutyRate(state, gender, wm) {
+    if (state === "himachal_pradesh") {
+      if (gender === "M") return wm <= 5000000 ? 6 : 8;
+      else return wm <= 8000000 ? 4 : 8;
+    }
+
+    if (state === "karnataka") {
+      if (wm <= 2000000) return 2;
+      if (wm <= 4500000) return 3;
+      return 5;
+    }
+
+    if (state === "uttarakhand") {
+      return gender === "M" ? 7 : 5.75;
+    }
+
+    const dutyRates = {
+      andhra_pradesh:     { M: 5.5,  W: 5.5 },
+      arunachal_pradesh:  { M: 7,    W: 7 },
+      assam:              { M: 8.25, W: 8.25 },
+      bihar:              { M: 7.7,  W: 7.7 },
+      chhattisgarh:       { M: 9,    W: 8 },
+      goa:                { M: 6,    W: 6 },
+      gujarat:            { M: 5.9,  W: 4.9 },
+      haryana:            { M: 8,    W: 6 },
+      jammu_kashmir:      { M: 5,    W: 5 },
+      jharkhand:          { M: 7,    W: 7 },
+      kerala:             { M: 10,   W: 10 },
+      madhya_pradesh:     { M: 10.5, W: 10.5 },
+      maharashtra:        { M: 7,    W: 6 },
+      manipur:            { M: 10,   W: 10 },
+      meghalaya:          { M: 9.9,  W: 9.9 },
+      mizoram:            { M: 9,    W: 9 },
+      nagaland:           { M: 8.25, W: 8.25 },
+      odisha:             { M: 7,    W: 6 },
+      punjab:             { M: 8,    W: 6 },
+      rajasthan:          { M: 6,    W: 5 },
+      sikkim:             { M: 6,    W: 6 },
+      tamil_nadu:         { M: 11,   W: 11 },
+      telangana:          { M: 5.5,  W: 5.5 },
+      tripura:            { M: 5,    W: 5 },
+      uttar_pradesh:      { M: 8,    W: 7 },
+      west_bengal:        { M: 7,    W: 7 }
+    };
+
+    return dutyRates[state]?.[gender] || 7;
+  }
 
   function getDocumentationCharges(area) {
     if (area <= 100) return 14000;
@@ -178,8 +194,8 @@
 
     const area = (b * l) / 9;
     const landCost = area * c;
-    const duty = dutyRates[s][a] / 100;
-    const stampDuty = wm * duty;
+    const dutyPercent = getDutyRate(s, a, wm);
+    const stampDuty = wm * (dutyPercent / 100);
     const docCharges = !isNaN(custom) && custom > 0 ? custom : getDocumentationCharges(area);
     const total = landCost + stampDuty + docCharges;
 
@@ -219,8 +235,8 @@
 
     const area = (b * l) / 9;
     const landCost = area * c;
-    const duty = dutyRates[s][a] / 100;
-    const stampDuty = wm * duty;
+    const dutyPercent = getDutyRate(s, a, wm);
+    const stampDuty = wm * (dutyPercent / 100);
     const docCharges = !isNaN(custom) && custom > 0 ? custom : getDocumentationCharges(area);
     const total = landCost + stampDuty + docCharges;
 
@@ -269,5 +285,4 @@
     doc.save("Land_Cost_Report.pdf");
   }
 </script>
-</body>
-</html>
+    
